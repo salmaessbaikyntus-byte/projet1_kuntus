@@ -1,0 +1,13 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Node.js
+node_modules/
+npm-debug.log
+.env
+
+# Dossiers Git accidentels
+.git/
