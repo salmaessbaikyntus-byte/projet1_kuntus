@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporting Dashboard | ShiftMaster</title>
+    <style>
+        :root { --primary: #CCFF00; --dark: #0A1F1C; --card: #142E2A; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        h2 { font-size: 2.5rem; font-weight: 800; margin: 0; }
+        
+        /* Bouton Style "Open Account" de l'image */
+        .btn-generate { 
+            background: var(--primary); color: black; border: none; 
+            padding: 15px 30px; border-radius: 30px; font-weight: bold;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-generate:hover { transform: scale(1.05); }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 15px; color: #888; text-transform: uppercase; font-size: 0.8rem; }
+        td { background: var(--card); padding: 20px; }
+        td:first-child { border-radius: 15px 0 0 15px; }
+        td:last-child { border-radius: 0 15px 15px 0; }
+
+        .download-link { color: var(--primary); text-decoration: none; font-weight: bold; }
+        .status-badge { background: rgba(204, 255, 0, 0.1); color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h2>BEST SOLUTION FOR<br><span style="color: var(--primary)">YOUR REPORTS</span></h2>
+        <p style="color: #888">Gérez vos documents RH avec une précision exacte.</p>
+    </div>
+    <button class="btn-generate" onclick="generateReport()">+ GENERER RAPPORT</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID Rapport</th>
+            <th>Type</th>
+            <th>Date de création</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="reportsTable"></tbody>
+</table>
+
+<script>
+    const API_URL = "http://localhost:5218"; // <--- VERIFIE TON PORT ICI !
+
+    async function generateReport() {
+        const btn = document.querySelector('.btn-generate');
+        btn.innerText = "Génération...";
+        
+        try {
+            const response = await fetch(`${API_URL}/api/Reports/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    planningId: crypto.randomUUID(),
+                    type: "PDF",
+                    generatedBy: "RH - SaLMa"
+                })
+            });
+            if(response.ok) await loadReports();
+            else alert("Erreur lors de la génération");
+        } catch (e) { console.error(e); }
+        
+        btn.innerText = "+ GENERER RAPPORT";
+    }
+
+    async function loadReports() {
+        try {
+            const response = await fetch(`${API_URL}/api/Reports`);
+            const data = await response.json();
+            const table = document.getElementById("reportsTable");
+            table.innerHTML = data.map(r => `
+                <tr>
+                    <td><code style="color: #aaa">${r.id.substring(0,8)}...</code></td>
+                    <td><span class="status-badge">${r.type}</span></td>
+                    <td>${new Date(r.createdAt).toLocaleString()}</td>
+                    <td><a class="download-link" href="${API_URL}/api/Reports/download/${r.id}">Télécharger ↓</a></td>
+                </tr>
+            `).join('');
+        } catch (e) { console.error("Impossible de charger les rapports"); }
+    }
+
+    loadReports();
+</script>
+</body>
+</html>

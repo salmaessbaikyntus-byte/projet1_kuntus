@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Analytics Dashboard | ShiftMaster</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root { --primary:#CCFF00; --dark:#0A1F1C; --card:#142E2A; }
+body { font-family:Segoe UI; background:var(--dark); color:white; padding:40px; }
+h1 { color:var(--primary); }
+.card {
+    background:var(--card);
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
+button {
+    background:var(--primary);
+    border:none;
+    padding:12px 20px;
+    border-radius:25px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:20px;
+}
+</style>
+</head>
+<body>
+
+<h1>Analytics Dashboard</h1>
+
+<button onclick="generateKpi()">Générer Snapshot KPI</button>
+
+<div class="grid">
+    <div class="card">
+        <h3>Total Employés</h3>
+        <p id="total">-</p>
+    </div>
+    <div class="card">
+        <h3>% En Pause</h3>
+        <p id="break">-</p>
+    </div>
+    <div class="card">
+        <h3>Score Équité</h3>
+        <p id="fairness">-</p>
+    </div>
+</div>
+
+<div class="card">
+    <canvas id="kpiChart"></canvas>
+</div>
+
+<script>
+const API_URL = "http://localhost:5130"; // ⚠️ Mets ton vrai port ici
+
+async function generateKpi() {
+    await fetch(`${API_URL}/api/Analytics/generate`, { method: 'POST' });
+    loadData();
+}
+
+async function loadData() {
+    const response = await fetch(`${API_URL}/api/Analytics`);
+    const data = await response.json();
+
+    if(data.length === 0) return;
+
+    const latest = data[data.length - 1];
+
+    document.getElementById("total").innerText = latest.totalEmployees;
+    document.getElementById("break").innerText = latest.breakPercentage.toFixed(2) + "%";
+    document.getElementById("fairness").innerText = latest.fairnessScore;
+
+    renderChart(data);
+}
+
+function renderChart(data) {
+    const ctx = document.getElementById('kpiChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map((_,i) => "Snapshot " + (i+1)),
+            datasets: [{
+                label: 'Break %',
+                data: data.map(d => d.breakPercentage),
+                borderColor: '#CCFF00'
+            }]
+        }
+    });
+}
+
+loadData();
+</script>
+
+</body>
+</html>

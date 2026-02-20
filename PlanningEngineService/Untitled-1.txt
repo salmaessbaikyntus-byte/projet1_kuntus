@@ -1,0 +1,27 @@
+Reporting Service:
+
+
+Générer les rapports officiels.
+Responsable :
+
+rapports RH
+
+exports PDF / Excel
+
+historique planning
+
+
+
+Analytics Service:
+
+Analyser la performance et les données.
+   
+    Responsable :
+
+statistiques avancées
+
+performance équipes
+
+équité horaires
+
+couverture appels

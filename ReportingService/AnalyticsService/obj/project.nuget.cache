@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "dk4xfww/9+M=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\saLMa.essbai\\MonProjetNet\\ReportingService\\AnalyticsService\\AnalyticsService.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\saLMa.essbai\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.3\\microsoft.aspnetcore.openapi.10.0.3.nupkg.sha512",
+    "C:\\Users\\saLMa.essbai\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

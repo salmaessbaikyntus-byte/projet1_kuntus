@@ -1,0 +1,14 @@
+C:\Users\saLMa.essbai\MonProjetNet\bin\Debug\net10.0\MonProjetNet.exe
+C:\Users\saLMa.essbai\MonProjetNet\bin\Debug\net10.0\MonProjetNet.deps.json
+C:\Users\saLMa.essbai\MonProjetNet\bin\Debug\net10.0\MonProjetNet.runtimeconfig.json
+C:\Users\saLMa.essbai\MonProjetNet\bin\Debug\net10.0\MonProjetNet.dll
+C:\Users\saLMa.essbai\MonProjetNet\bin\Debug\net10.0\MonProjetNet.pdb
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.AssemblyInfoInputs.cache
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.AssemblyInfo.cs
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.csproj.CoreCompileInputs.cache
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.dll
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\refint\MonProjetNet.dll
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.pdb
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\MonProjetNet.genruntimeconfig.cache
+C:\Users\saLMa.essbai\MonProjetNet\obj\Debug\net10.0\ref\MonProjetNet.dll
