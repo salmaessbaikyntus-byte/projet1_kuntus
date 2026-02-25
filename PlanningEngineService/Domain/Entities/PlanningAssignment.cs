@@ -1,13 +1,16 @@
-namespace PlanningEngineService.Domain.Entities;
+using System.Text.Json.Serialization;
+
+namespace PlanningEngineService.Domain.Entities; // Vérifie que c'est bien ton namespace
 
 public class PlanningAssignment
 {
     public Guid Id { get; set; }
     public Guid EmployeeId { get; set; }
-
-    public DateTime Date { get; set; }
-    public TimeSpan LunchStart { get; set; }
-    public TimeSpan LunchEnd { get; set; }
-
-    public string SpecialCaseType { get; set; } = "Standard";
+    
+    // Le [JsonIgnore] empêche Swagger de te demander l'objet complet
+    [JsonIgnore]
+    public Employee? Employee { get; set; } 
+    
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
 }
