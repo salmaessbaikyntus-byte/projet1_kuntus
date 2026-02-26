@@ -50,6 +50,8 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
+PlanningEngineTest.Run();
+
 app.Run();
 
 // Modèle de données météo
