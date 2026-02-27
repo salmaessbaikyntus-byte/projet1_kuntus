@@ -1,20 +1,29 @@
 using Microsoft.EntityFrameworkCore;
+using ReportingService.Domain;
 using ReportingService.Domain.Entities;
 
-namespace ReportingService.Infrastructure.Data
+namespace ReportingService.Infrastructure.Data;
+
+public class ApplicationDbContext : DbContext
 {
-    public class ApplicationDbContext : DbContext
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options) { }
+
+    public DbSet<Report> Reports => Set<Report>();
+    public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<PlanningAssignment> PlanningAssignments => Set<PlanningAssignment>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        modelBuilder.Entity<Report>(e =>
         {
-        }
-
-        // Reporting
-        public DbSet<Report> Reports { get; set; }
-
-        // Organisation / Planning
-        public DbSet<Employee> Employees { get; set; }
-        public DbSet<PlanningAssignment> PlanningAssignments { get; set; }
+            e.Property(r => r.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<ReportStatus>(v))
+                .HasMaxLength(20);
+            e.Property(r => r.Reason).HasMaxLength(500);
+            e.Property(r => r.ExportFormat).HasMaxLength(10);
+        });
     }
 }

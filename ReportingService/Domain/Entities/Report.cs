@@ -1,30 +1,29 @@
-using System;
+namespace ReportingService.Domain.Entities;
 
-namespace ReportingService.Domain.Entities
+/// <summary>
+/// Rapport RH officiel, versionné et traçable.
+/// </summary>
+public class Report
 {
-    public class Report
-    {
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
+    public Guid PlanningId { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
 
-        // Ajout indispensable pour que ton service compile sans modification
-        public Guid PlanningId { get; set; } 
+    public DateTime PeriodStart { get; set; }
+    public DateTime PeriodEnd { get; set; }
 
-        // Utilisation de "string.Empty" pour supprimer les 7 avertissements (Warnings)
-        public string Category { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
+    public string GeneratedFor { get; set; } = string.Empty;
+    public string GeneratedBy { get; set; } = string.Empty;
+    public string? Reason { get; set; }
 
-        public DateTime PeriodStart { get; set; }
-        public DateTime PeriodEnd { get; set; }
+    public ReportStatus Status { get; set; }
+    public string VersionHash { get; set; } = string.Empty;
 
-        public string GeneratedFor { get; set; } = string.Empty;
-        public string GeneratedBy { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    public string ExportFormat { get; set; } = "PDF";
 
-        public string Status { get; set; } = string.Empty;
-
-        public string VersionHash { get; set; } = string.Empty;
-
-        public string FilePath { get; set; } = string.Empty;
-
-        public DateTime CreatedAt { get; set; }
-    }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? ObsoleteAt { get; set; }
 }
+

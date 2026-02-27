@@ -1,11 +1,18 @@
 using Microsoft.EntityFrameworkCore;
+using PlanningEngineService.Application.UseCases;
 using PlanningEngineService.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. CONFIGURATION DES SERVICES ---
-// Ajoute le support des Controllers (pour ton EmployeesController)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 builder.Services.AddControllers();
+builder.Services.AddScoped<GenerateWeeklyPlanningUseCase>();
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -31,8 +38,24 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+// Seed DB pour DEV/TEST si vide (idempotent)
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<PlanningDbContext>();
+    try
+    {
+        await DatabaseSeeder.SeedAsync(ctx);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "Seed DB ignoré (DB peut-être vide ou en cours de migration)");
+    }
+}
 
 // Lie les routes à tes Controllers (Important pour /api/employees)
 app.MapControllers();

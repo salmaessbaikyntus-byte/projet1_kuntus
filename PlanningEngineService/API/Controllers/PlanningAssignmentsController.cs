@@ -18,9 +18,22 @@ public class PlanningAssignmentsController : ControllerBase
 
     // GET: api/planningassignments
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] DateTime? start, [FromQuery] DateTime? end)
     {
-        var assignments = await _context.PlanningAssignments
+        var query = _context.PlanningAssignments.AsQueryable();
+
+        if (start.HasValue)
+        {
+            var startDate = DateOnly.FromDateTime(start.Value);
+            query = query.Where(p => p.AssignmentDate >= startDate);
+        }
+        if (end.HasValue)
+        {
+            var endDate = DateOnly.FromDateTime(end.Value);
+            query = query.Where(p => p.AssignmentDate <= endDate);
+        }
+
+        var assignments = await query
             .Include(p => p.Employee)
             .ToListAsync();
 

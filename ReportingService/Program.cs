@@ -1,23 +1,21 @@
+using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
-using ReportingService.Infrastructure.Data;
 using ReportingService.Application.Interfaces;
-using ReportingService.Infrastructure.Repositories;
-using ReportingService.Application.Services;
+using ReportingService.Application.UseCases;
+using ReportingService.Infrastructure;
+using ReportingService.Infrastructure.Data;
 using ReportingService.Infrastructure.Export;
+using ReportingService.Infrastructure.Repositories;
 
-// 1. Indispensable pour éviter les erreurs de format de date avec PostgreSQL
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 2. Configuration du CORS (Autorise votre page HTML à appeler l'API)
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
 
@@ -25,14 +23,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 3. Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 4. Injection de dépendances (Enregistrement unique de chaque service)
+builder.Services.Configure<PlanningEngineOptions>(builder.Configuration.GetSection(PlanningEngineOptions.SectionName));
+builder.Services.Configure<AnalyticsOptions>(builder.Configuration.GetSection(AnalyticsOptions.SectionName));
+
+builder.Services.AddHttpClient<IPlanningDataProvider, PlanningEngineApiDataProvider>(c =>
+{
+    var url = builder.Configuration[$"{PlanningEngineOptions.SectionName}:BaseUrl"] ?? "http://localhost:5088";
+    c.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
+builder.Services.AddHttpClient<IAnalyticsClient, AnalyticsHttpClient>(c =>
+{
+    var url = builder.Configuration[$"{AnalyticsOptions.SectionName}:BaseUrl"] ?? "http://localhost:5090";
+    c.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+    c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
+
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
-builder.Services.AddScoped<PdfExportService>();
-builder.Services.AddScoped<ReportGenerationService>();
+builder.Services.AddScoped<IPdfReportGenerator, PdfReportGenerator>();
+builder.Services.AddScoped<IExcelReportGenerator, ExcelReportGenerator>();
+builder.Services.AddScoped<GenerateReportUseCase>();
+builder.Services.AddScoped<GetReportHistoryUseCase>();
+builder.Services.AddScoped<MarkReportsObsoleteUseCase>();
 
 var app = builder.Build();
 

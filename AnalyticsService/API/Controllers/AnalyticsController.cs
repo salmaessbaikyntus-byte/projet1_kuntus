@@ -1,62 +1,57 @@
+using AnalyticsService.Application.UseCases;
 using Microsoft.AspNetCore.Mvc;
-using AnalyticsService.Application.Services;
 
-namespace AnalyticsService.API.Controllers
+namespace AnalyticsService.API.Controllers;
+
+/// <summary>
+/// API Analytics - KPI, conformité, équité, simulations What-if.
+/// Ne génère jamais de planning.
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class AnalyticsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AnalyticsController : ControllerBase
+    private readonly ComputeKpisUseCase _computeKpis;
+    private readonly RunSimulationUseCase _runSimulation;
+
+    public AnalyticsController(ComputeKpisUseCase computeKpis, RunSimulationUseCase runSimulation)
     {
-        private readonly PlanningQueryService _planningQuery;
-        private readonly TenPercentEngine _tenPercent;
-        private readonly FairnessEngine _fairness;
+        _computeKpis = computeKpis;
+        _runSimulation = runSimulation;
+    }
 
-        public AnalyticsController(
-            PlanningQueryService planningQuery,
-            TenPercentEngine tenPercent,
-            FairnessEngine fairness)
-        {
-            _planningQuery = planningQuery;
-            _tenPercent = tenPercent;
-            _fairness = fairness;
-        }
+    /// <summary>
+    /// Calcule les KPI pour une période.
+    /// </summary>
+    [HttpGet("kpi")]
+    [ProducesResponseType(typeof(KpiResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetKpis(
+        [FromQuery] DateTime start,
+        [FromQuery] DateTime end,
+        [FromQuery] Guid? serviceUnitId = null,
+        CancellationToken ct = default)
+    {
+        var result = await _computeKpis.ExecuteAsync(start, end, serviceUnitId, ct);
 
-        [HttpGet("kpi")]
-        public async Task<IActionResult> GetKpis(
-            [FromQuery] DateTime start, 
-            [FromQuery] DateTime end, 
-            [FromQuery] Guid? departmentId = null)
-        {
-            try 
-            {
-                var planning = await _planningQuery.GetPlanningAsync(start, end, departmentId);
+        if (result.Kpis.TotalAssignments == 0 && result.Kpis.Compliance.TotalDaysAnalyzed == 0)
+            return NotFound(new { message = "Aucune donnée de planning trouvée pour cette période." });
 
-                if (planning == null || !planning.Any())
-                    return NotFound("Aucune donnée de planning trouvée pour cette période.");
+        return Ok(result);
+    }
 
-                // Calculs via les moteurs de règles
-                _tenPercent.Evaluate(planning);
-                var fairnessScore = _fairness.CalculateScore(planning);
-
-                return Ok(new
-                {
-                    PeriodStart = start,
-                    PeriodEnd = end,
-                    TenPercentRule = new
-                    {
-                        IsValid = _tenPercent.IsValid,
-                        MaxObservedPercentage = _tenPercent.MaxObservedPercentage,
-                        Violations = _tenPercent.ViolationsCount // Utile pour l'interface
-                    },
-                    FairnessScore = fairnessScore,
-                    TotalAssignments = planning.Count,
-                    GeneratedAt = DateTime.UtcNow
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne : {ex.Message}");
-            }
-        }
+    /// <summary>
+    /// Simulation What-if : impact d'absences supposées (lecture seule).
+    /// </summary>
+    [HttpGet("simulate/absences")]
+    [ProducesResponseType(typeof(SimulationResultDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SimulateAbsences(
+        [FromQuery] DateTime start,
+        [FromQuery] DateTime end,
+        [FromQuery] int assumedAbsentCount = 5,
+        CancellationToken ct = default)
+    {
+        var result = await _runSimulation.SimulateAbsencesAsync(start, end, assumedAbsentCount, ct);
+        return Ok(result);
     }
 }

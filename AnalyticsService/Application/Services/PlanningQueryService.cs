@@ -20,7 +20,7 @@ namespace AnalyticsService.Application.Services
         {
             var query = _context.PlanningAssignments
                 .Include(p => p.Employee)
-                .Where(p => p.Date >= start && p.Date <= end);
+                .Where(p => p.AssignmentDate >= start && p.AssignmentDate <= end);
 
             if (departmentId.HasValue)
             {

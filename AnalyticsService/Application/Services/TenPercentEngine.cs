@@ -31,8 +31,8 @@ namespace AnalyticsService.Application.Services
             foreach (var slot in slots)
             {
                 int onBreak = assignments.Count(a =>
-                    a.LunchStart <= slot &&
-                    a.LunchEnd > slot);
+                    a.StartTime.TimeOfDay <= slot &&
+                    a.EndTime.TimeOfDay > slot);
 
                 double percentage = totalEmployees == 0
                     ? 0
